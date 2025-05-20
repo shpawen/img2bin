@@ -1,26 +1,22 @@
-const img = document.getElementById("sourceImage");
-const canva = document.getElementById("bin_img_canva").getContext("2d");
+const canva = document.getElementById("bin_img_canva")
+const canvaContext = canva.getContext("2d");
+
+let imageWidth, imageHeight, originalImageData = null;
 
 document.getElementById("pasteButton").addEventListener("click", pasteImage);
-document.getElementById("binaryButton").addEventListener("click", () => {
-    const imageWidth = document.getElementById("sourceImage").clientWidth;
-    const imageHeight = document.getElementById("sourceImage").clientHeight;
-    canva.drawImage(img, 0, 0);
-    const imageToBin = canva.getImageData(0, 0, imageWidth, imageHeight);
-    const threshold = document.getElementById("threshold").value;
-    return image_binarization(imageToBin, imageWidth, imageHeight, threshold);
+document.getElementById("threshold").addEventListener("input", (event) => {
+    const imageWorkingCopy = new ImageData(
+        new Uint8ClampedArray(originalImageData.data),
+        originalImageData.width,
+        originalImageData.height
+    );
+    return image_binarization(imageWorkingCopy, imageWidth, imageHeight, event.target.value);
 })
-
-img.onload = function () {
-    document.getElementById("bin_img_canva").width
-        = document.getElementById("sourceImage").clientWidth;
-    document.getElementById("bin_img_canva").height
-        = document.getElementById("sourceImage").clientHeight;
-}
 
 async function pasteImage() {
     try {
         const clipboardItems = await navigator.clipboard.read();
+        originalImageData = null;
 
         for (const item of clipboardItems) {
             if (!item.types.includes("image/png")) {
@@ -28,9 +24,24 @@ async function pasteImage() {
             }
 
             const blob = await item.getType("image/png");
+            const bitmap = await createImageBitmap(blob);
 
-            const img = document.getElementById("sourceImage");
-            img.src = URL.createObjectURL(blob);
+            imageWidth = bitmap.width;
+            imageHeight = bitmap.height;
+
+            canva.width = imageWidth;
+            canva.height = imageHeight;
+
+            canvaContext.drawImage(bitmap, 0, 0);
+
+            const imageData = canvaContext.getImageData(0, 0, imageWidth, imageHeight);
+            originalImageData = new ImageData(
+                new Uint8ClampedArray(imageData.data),
+                imageData.width,
+                imageData.height
+            );
+
+            bitmap.close();
         }
     }
     catch (error) {
@@ -38,7 +49,7 @@ async function pasteImage() {
     }
 }
 
-export function image_binarization(image, width, height, threshold) {
+async function image_binarization(image, width, height, threshold) {
     console.log(`Threshold is ${threshold}`);
     for (let y = 0; y < height; y++) {
         for (let x = 0; x < width; x++) {
@@ -61,5 +72,6 @@ export function image_binarization(image, width, height, threshold) {
             // Alpha channel remains untouched
         }
     }
-    canva.putImageData(image, 0, 0);
+    canvaContext.putImageData(image, 0, 0);
 }
+

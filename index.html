@@ -1,15 +1,16 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <title>Binarization</title>
-        <script  type="module" src="binarization.js" defer></script>
-    </head>
-    <body>
-        <button id="pasteButton">Paste Image</button>
-        <input type="range" min="0" max="255" value="97" id="threshold">
-        <button id="binaryButton">Binary it!</button>
-        <br><br>
-        <img id="sourceImage"/>
-        <canvas id="bin_img_canva" width="" height="">Binary image</canvas>
-    </body>
+
+<head>
+    <title>Binarization</title>
+    <script type="module" src="binarization.js" defer></script>
+</head>
+
+<body>
+    <button id="pasteButton">Paste Image</button>
+    <input type="range" min="0" max="255" value="97" id="threshold" style="width:calc-size(any,100% - 100px);">
+    <br><br>
+    <canvas id="bin_img_canva" width="" height="">Binary image</canvas>
+</body>
+
 </html>
